@@ -1,0 +1,1 @@
+some questions would have the right answer and some will not. If something has a right answer than after selecting right answer will be displayed, else nothing special will be displayed.

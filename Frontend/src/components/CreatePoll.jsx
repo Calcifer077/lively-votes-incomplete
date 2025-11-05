@@ -3,7 +3,8 @@ import { css } from "@emotion/css";
 
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { Typography, Box, TextField, Stack, Button } from "@mui/material";
+import { Typography, Box, Stack, Button } from "@mui/material";
+import TextField from "../ui/TextField";
 
 function CreatePoll() {
   // By default only 3 things are required, formQuestion and 2 options, if the user adds any more options and leave them blank, than we will just ignore those options.
@@ -113,19 +114,6 @@ function CreatePoll() {
           // Error handling
           error={pollQuestionError}
           helperText={pollQuestionError ? "This field is required" : ""}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: "var(--lighter-purple)", // default border color
-              },
-              "&:hover fieldset": {
-                borderColor: "var(--hover-indigo)", // on hover
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "var(--active-indigo)", // when focused
-              },
-            },
-          }}
         />
 
         <Typography
@@ -150,19 +138,6 @@ function CreatePoll() {
                 pollOptionsError[index] ? "This field is requierd" : ""
               }
               key={index}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "var(--lighter-purple)", // default border color
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "var(--hover-indigo)", // on hover
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "var(--active-indigo)", // when focused
-                  },
-                },
-              }}
             />
           ))}
           <Button

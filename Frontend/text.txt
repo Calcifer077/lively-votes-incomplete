@@ -1,1 +1,3 @@
 some questions would have the right answer and some will not. If something has a right answer than after selecting right answer will be displayed, else nothing special will be displayed.
+
+right now, i am using declarative mode of react router, in future try to switch to data or framework.

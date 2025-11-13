@@ -1,12 +1,11 @@
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import { AppBar, Box, Toolbar, Typography, Stack, Button } from "@mui/material";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
-import Stack from "@mui/material/Stack";
+
+import { useNavigate } from "react-router";
 
 export default function ButtonAppBar() {
+  const navigate = useNavigate();
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
@@ -71,6 +70,7 @@ export default function ButtonAppBar() {
               My Votes
             </Button>
             <Button
+              onClick={() => navigate("/createPoll")}
               variant="text"
               sx={{
                 color: "var(--dark-gray)",

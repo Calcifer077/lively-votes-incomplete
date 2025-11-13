@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { Box, Button, Typography, Link, Paper } from "@mui/material";
 import TextField from "../ui/TextField";
 
+import { useAuth } from "./../features/authentication/AuthContext";
+
 export default function LoginPage() {
+  const { login } = useAuth();
+
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState(false);
 
@@ -17,6 +21,11 @@ export default function LoginPage() {
       setError(true);
       return;
     }
+
+    // Here 'login' function from context api will run which is responsible for setting userId and userEmail.
+    // It expects a object such as {id: '1', email: 'test@email.com'}
+    // Do a request to backend and than set the id
+    // login();
 
     setError(false);
     console.log("✅ Login submitted:", form);

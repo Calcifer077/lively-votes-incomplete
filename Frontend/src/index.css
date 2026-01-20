@@ -17,6 +17,7 @@
   --active-indigo: oklch(51.1% 0.262 276.966);
   --light-purple: oklch(82.7% 0.119 306.383);
   --lighter-purple: oklch(90.2% 0.063 306.703);
+  --lightest-purple: oklch(95.422% 0.01723 308.046);
 }
 
 body {

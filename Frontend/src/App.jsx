@@ -9,8 +9,7 @@ import CreatePoll from "./components/CreatePoll";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import AppLayout from "./pages/AppLayout";
-
-// import { AuthProvider } from "./features/authentication/AuthContext";
+import ProfilePage from "./pages/ProfilePage";
 
 import { AuthProvider } from "./context/AuthContext";
 
@@ -51,6 +50,7 @@ function App() {
                     <Route path="/createPoll" element={<CreatePoll />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
                   </Route>
                 </Routes>
               </AuthProvider>

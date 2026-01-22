@@ -52,7 +52,11 @@ export default function ButtonAppBar() {
                 Create Poll
               </NavbarButton>
             )}
-            {userId && <NavbarButton>My Profile</NavbarButton>}
+            {userId && (
+              <NavbarButton onClick={() => navigate("/profile")}>
+                My Profile
+              </NavbarButton>
+            )}
 
             {!userId && (
               <NavbarButton onClick={() => navigate("/signup")}>

@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { whichOptionVoted } from "../../services/apiPolls";
 
+// returns the option id on which the user have voted for the given pollId
+// only works if the user is logged in
+// if the user is not logged in, returns 0
 export const useWhichOptionVoted = function (pollId) {
   const {
     data: optionId,

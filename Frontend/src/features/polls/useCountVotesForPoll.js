@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { countVotesForPoll } from "../../services/apiPolls";
+import { countVotesForPoll as countVotesForPollApi } from "../../services/apiPolls";
 
+// returns a array which contains votes for each option.
+// doesn't depend if the user is logged in or not.
 export function useCountVotesForPoll(pollId) {
   const {
     data: optionsWithVoteCount,
@@ -9,7 +11,7 @@ export function useCountVotesForPoll(pollId) {
     error,
   } = useQuery({
     queryKey: ["countVotesForPoll", pollId],
-    queryFn: () => countVotesForPoll(pollId),
+    queryFn: () => countVotesForPollApi(pollId),
   });
 
   if (isLoading) {

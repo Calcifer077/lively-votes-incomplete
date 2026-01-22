@@ -1,10 +1,47 @@
 import { css } from "@emotion/css";
-import { Avatar, Box, Button, Divider, Grid, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  Grid,
+  Typography,
+} from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DoneIcon from "@mui/icons-material/Done";
 import CreateIcon from "@mui/icons-material/Create";
+import { useGetProfileData } from "../features/profile/useGetProfileData";
+import { useLogout } from "../features/authentication/useLogout";
+import { useAuthContextDispatch } from "../context/AuthContext";
+import { useNavigate } from "react-router";
+import { useGetPollsUserHaveVotedIn } from "../features/profile/useGetPollsUserHaveVotedIn";
+
+import Poll from "../components/Poll";
 
 function ProfilePage() {
+  const navigate = useNavigate();
+
+  const { data: profileData } = useGetProfileData();
+  const { logout, isLoading: isLoadingLogout } = useLogout();
+  const { pollsUserHaveVotedIn, isLoading: isLoadingPollsUserHaveVotedIn } =
+    useGetPollsUserHaveVotedIn();
+
+  const dispatch = useAuthContextDispatch();
+
+  async function handleLogout() {
+    try {
+      await logout();
+
+      dispatch({
+        type: "logout",
+      });
+
+      navigate("/login");
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
     <div
       className={css`
@@ -44,15 +81,22 @@ function ProfilePage() {
               />
             </Box>
             <Box>
-              <Typography variant="h6">ID, name</Typography>
+              <Typography variant="h6">
+                ID: {profileData?.user.id}, name: {profileData?.user.name}
+              </Typography>
               <Typography variant="body2" color="text.secondary">
-                Email
+                Email: {profileData?.user.email}
               </Typography>
             </Box>
           </Box>
 
           {/* Logout Button */}
-          <Button variant="contained" color="error">
+          <Button
+            variant="contained"
+            color="error"
+            disabled={isLoadingLogout}
+            onClick={handleLogout}
+          >
             Logout
           </Button>
         </Box>
@@ -87,7 +131,7 @@ function ProfilePage() {
               <Box>Total polls created</Box>
             </Typography>
             <Typography variant="h5" sx={{ marginTop: "6px" }}>
-              0
+              {profileData?.pollsCreated}
             </Typography>
           </Box>
           <Box
@@ -113,7 +157,7 @@ function ProfilePage() {
               <Box>Polls participated in</Box>
             </Typography>
             <Typography variant="h5" sx={{ marginTop: "6px" }}>
-              0
+              {profileData?.pollsParticipated}
             </Typography>
           </Box>
         </Box>
@@ -130,23 +174,23 @@ function ProfilePage() {
       >
         <Typography variant="h6">Recent Activity</Typography>
 
-        {/* <Grid container columns={10} spacing={4}>
-          <Grid size={5}>
-            <Poll
-              question="This is a test"
-              options={options}
-              byMe={true}
-            ></Poll>
-          </Grid>
+        {isLoadingPollsUserHaveVotedIn && <CircularProgress />}
 
-          <Grid size={5}>
-            <Poll
-              question="This is a test"
-              options={options}
-              byMe={true}
-            ></Poll>
+        {!isLoadingPollsUserHaveVotedIn && (
+          <Grid container columns={10} spacing={4}>
+            {pollsUserHaveVotedIn?.map((el) => (
+              <Grid size={5}>
+                <Poll
+                  question={el.question}
+                  options={el.options}
+                  byMe={true}
+                  pollId={el.pollId}
+                  key={el.pollId}
+                ></Poll>
+              </Grid>
+            ))}
           </Grid>
-        </Grid> */}
+        )}
       </Box>
     </div>
   );

@@ -9,13 +9,16 @@ import DoneIcon from "@mui/icons-material/Done";
 import { useCasteVote } from "../features/polls/useCasteVote";
 import { useWhichOptionVoted } from "../features/polls/useWhichOptionVoted";
 import { useCountVotesForPoll } from "../features/polls/useCountVotesForPoll";
+import { CircularProgress } from "@mui/material";
 
 function Poll({ question, options, byMe, pollId }) {
   const queryClient = useQueryClient();
 
   const { casteVote } = useCasteVote();
-  const { optionId, isLoading } = useWhichOptionVoted(pollId);
-  const { optionsWithVoteCount } = useCountVotesForPoll(pollId);
+  const { optionId, isLoadingOptionId } = useWhichOptionVoted(pollId);
+
+  const { optionsWithVoteCount, isLoadingOptionsWithVoteCount } =
+    useCountVotesForPoll(pollId);
 
   const showProgress = byMe || optionId !== 0;
 
@@ -76,7 +79,8 @@ function Poll({ question, options, byMe, pollId }) {
           gap: 10px;
         `}
       >
-        {!isLoading &&
+        {isLoadingOptionsWithVoteCount && <CircularProgress />}
+        {!isLoadingOptionId &&
           options.map((el, index) => (
             <div
               className={css`
@@ -86,7 +90,10 @@ function Poll({ question, options, byMe, pollId }) {
             >
               <Button
                 sx={{
-                  display: showProgress ? "block" : "none",
+                  display:
+                    showProgress || isLoadingOptionsWithVoteCount
+                      ? "block"
+                      : "none",
                   position: "absolute",
                   width: `${overlayWidths[index] || 0}%`,
                   height: "100%",
@@ -99,7 +106,7 @@ function Poll({ question, options, byMe, pollId }) {
 
               <Button
                 variant="outlined"
-                disabled={byMe || isLoading || el.id === optionId}
+                disabled={byMe || isLoadingOptionId || el.id === optionId}
                 startIcon={el.id === optionId ? <DoneIcon /> : null}
                 key={el.id}
                 onClick={() => handleClick(el.id)}
@@ -123,7 +130,8 @@ function Poll({ question, options, byMe, pollId }) {
                       right: 10px;
                     `}
                   >
-                    {optionsWithVoteCount[index].voteCount}
+                    {!isLoadingOptionsWithVoteCount &&
+                      optionsWithVoteCount[index]?.voteCount}
                   </span>
                 )}
               </Button>

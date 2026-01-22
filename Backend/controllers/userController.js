@@ -82,8 +82,8 @@ export const getUserData = catchAsync(async function (req, res, next) {
         name: UsersTable.name,
         email: UsersTable.email,
       },
-      pollsCreated: sql`count(${PollTable.id})`.mapWith(Number),
-      pollsParticipated: sql`count(${VoteTable.id})`.mapWith(Number),
+      pollsCreated: sql`count(distinct ${PollTable.id})`.mapWith(Number),
+      pollsParticipated: sql`count(distinct ${VoteTable.id})`.mapWith(Number),
     })
     .from(UsersTable)
     .where(eq(UsersTable.id, userId))

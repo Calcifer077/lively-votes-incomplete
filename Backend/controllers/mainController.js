@@ -5,6 +5,7 @@ import { eq, and, count, sql } from "drizzle-orm";
 import { OptionTable, PollTable, UsersTable, VoteTable } from "../db/schema.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import { io } from "../app.js";
 
 const db = drizzle(process.env.DATABASE_URL);
 
@@ -84,8 +85,6 @@ export const getAllPolls = catchAsync(async function (req, res, next) {
       }
     }
   }
-
-  // console.log(data);
 
   res.status(200).json({
     status: "success",
@@ -179,6 +178,7 @@ async function createVote(vote) {
   }
 }
 
+// creates new vote in the database
 export const castVote = catchAsync(async function (req, res, next) {
   // 1. Get data from req body
   // what we need, userId, pollId, optionId
@@ -239,6 +239,9 @@ export const castVote = catchAsync(async function (req, res, next) {
       .where(and(eq(VoteTable.poll_id, pollId), eq(VoteTable.user_id, userId)))
       .returning();
 
+    // this event will be emitted when a vote has already been casted and user changed his vote.
+    io.emit("votes:caste", pollId);
+
     return res.status(201).json({
       status: "success",
       data: {
@@ -258,6 +261,9 @@ export const castVote = catchAsync(async function (req, res, next) {
   // We have added constraint to the schema but the error shown to the user will be too technical, so the below function will throw a well formatted error.
   const dataToReturn = await createVote(vote);
 
+  // this event will be emitted when the user is casting vote for the very first time.
+  io.emit("votes:caste", pollId);
+
   res.status(201).json({
     status: "success",
     data: {
@@ -267,6 +273,7 @@ export const castVote = catchAsync(async function (req, res, next) {
 });
 
 /**
+ * Count votes for a poll using its pollId
  * What it needs -> parameters from req.params (pollId)
  * What it returns -> dataToReturn
  * dataToReturn : {

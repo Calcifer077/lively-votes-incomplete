@@ -3,11 +3,25 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 // import { rateLimit } from "express-rate-limit";
 // import { slowDown } from "express-slow-down";
+import { Server } from "socket.io";
+import { createServer } from "node:http";
 
 import pollRouter from "./routes/pollRoute.js";
 import userRouter from "./routes/userRoutes.js";
 
 const app = express();
+const httpServer = createServer(app);
+
+const allowedOrigins = ["http://localhost:5173"];
+
+export const io = new Server(httpServer, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "DELETE", "PATCH"],
+    credentials: true,
+  },
+});
+
 const port = 3000;
 
 // Slow down our server after too many requests
@@ -24,13 +38,12 @@ const port = 3000;
 //   limit: 2,
 // });
 
-const allowedOrigins = ["http://localhost:5173"];
-
 app.use(
   cors({
     origin: allowedOrigins,
     methods: ["GET", "POST", "DELETE", "PATCH"],
-  })
+    credentials: true,
+  }),
 );
 
 app.use(express.json());
@@ -40,6 +53,14 @@ app.use(cookieParser());
 
 app.use("/api/v1/polls", pollRouter);
 app.use("/api/v1/users", userRouter);
+
+io.on("connection", (socket) => {
+  console.log("user connected");
+
+  socket.on("polls:fetched", () => console.log("All polls fetched"));
+
+  socket.on("disconnect", () => console.log("User disconnected"));
+});
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -55,6 +76,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`App running on port ${port}`);
 });

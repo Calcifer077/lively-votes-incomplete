@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { eq, and, count, sql, asc, inArray } from "drizzle-orm";
+import { eq, and, count, sql, asc, inArray, notInArray } from "drizzle-orm";
 
 import { OptionTable, PollTable, UsersTable, VoteTable } from "../db/schema.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -8,16 +8,6 @@ import AppError from "../utils/appError.js";
 import { io } from "../app.js";
 
 const db = drizzle(process.env.DATABASE_URL);
-
-let totalRowsInPollTable;
-
-const init = async function () {
-  // calculate total number of rows in poll table, is used in pagination function
-  const [res] = await db.select({ count: count() }).from(PollTable);
-  totalRowsInPollTable = res;
-};
-
-init();
 
 /**
  * It returns all polls regardless of any condition.
@@ -105,6 +95,26 @@ export const getAllPolls = catchAsync(async function (req, res, next) {
 
 export const getPollsWithPagination = catchAsync(
   async function (req, res, next) {
+    // The user is authenticated
+    const userId = res.user.id;
+
+    const [userFromDatabase] = await db
+      .select()
+      .from(UsersTable)
+      .where(eq(UsersTable.id, userId));
+
+    if (!userFromDatabase) {
+      return next(new AppError("No User found with this ID", 401));
+    }
+
+    // we will not be returning those polls in which user have voted in.
+    const pollsUserHaveParticipatedInArr =
+      await pollsUserHaveParticipatedIn(userId);
+
+    const pollsUserVotedIn = [];
+
+    pollsUserHaveParticipatedInArr.map((el) => pollsUserVotedIn.push(el.id));
+
     // data to be returned.
     let data = [];
 
@@ -114,7 +124,14 @@ export const getPollsWithPagination = catchAsync(
     // will store all the PollTable.id inside it which we have fetched.
     const pollIds = [];
 
-    // 1. get Polls
+    // 1. get total number of polls for this user and those polls page by page.
+    // get the number of those polls in which user have not voted in / participated in.
+    const [totalRowsInPollTable] = await db
+      .select({ count: count() })
+      .from(PollTable)
+      .where(notInArray(PollTable.id, pollsUserVotedIn));
+
+    // get those polls in which user have not voted in / participated in
     const polls = await db
       .select({
         id: PollTable.id,
@@ -124,7 +141,8 @@ export const getPollsWithPagination = catchAsync(
       .from(PollTable)
       .orderBy(asc(PollTable.id))
       .limit(numberOfRowsPerRes)
-      .offset((page - 1) * numberOfRowsPerRes);
+      .offset((page - 1) * numberOfRowsPerRes)
+      .where(notInArray(PollTable.id, pollsUserVotedIn));
 
     data = [...polls];
 
@@ -170,13 +188,22 @@ export const getPollsWithPagination = catchAsync(
     res.status(200).json({
       status: "success",
       data: data,
-      page: page,
+      page: Number(page),
       rowsPerPage: numberOfRowsPerRes,
-      totalRows: totalRowsInPollTable,
+      totalRows: totalRowsInPollTable.count,
       totalPages: Math.ceil(totalRowsInPollTable.count / numberOfRowsPerRes),
     });
   },
 );
+
+const pollsUserHaveParticipatedIn = async function (userId) {
+  const res = await db
+    .select({ id: VoteTable.poll_id })
+    .from(VoteTable)
+    .where(eq(VoteTable.user_id, userId));
+
+  return res;
+};
 
 // Creats a new poll, user should be authenticated for this to work
 export const createPoll = catchAsync(async function (req, res, next) {

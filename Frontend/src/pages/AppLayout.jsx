@@ -12,11 +12,16 @@ function AppLayout() {
   const isAuthenticated = Boolean(userId && jwt && email);
 
   useEffect(() => {
-    // Redirect to signup if not authenticated
     if (!isAuthenticated) {
-      navigate("/signup");
+      // Only redirect if we're NOT already on an auth page
+      if (
+        !location.pathname.startsWith("/signup") &&
+        !location.pathname.startsWith("/login")
+      ) {
+        navigate("/signup", { replace: true });
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, location.pathname]);
 
   return (
     <div>

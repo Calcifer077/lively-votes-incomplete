@@ -12,13 +12,15 @@ import DoneIcon from "@mui/icons-material/Done";
 import CreateIcon from "@mui/icons-material/Create";
 import { useGetProfileData } from "../features/profile/useGetProfileData";
 import { useLogout } from "../features/authentication/useLogout";
-import { useAuthContextDispatch } from "../context/AuthContext";
+import { useAuthContext, useAuthContextDispatch } from "../context/AuthContext";
 import { useNavigate } from "react-router";
 import { useGetPollsUserHaveVotedIn } from "../features/profile/useGetPollsUserHaveVotedIn";
 
 import Poll from "../components/Poll";
 
 function ProfilePage() {
+  const { userId } = useAuthContext();
+
   const navigate = useNavigate();
 
   const { data: profileData } = useGetProfileData();
@@ -183,7 +185,7 @@ function ProfilePage() {
                 <Poll
                   question={el.question}
                   options={el.options}
-                  byMe={true}
+                  byMe={userId && el.user_id === userId}
                   pollId={el.pollId}
                   key={el.pollId}
                 ></Poll>

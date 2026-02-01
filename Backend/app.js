@@ -12,7 +12,9 @@ import userRouter from "./routes/userRoutes.js";
 const app = express();
 const httpServer = createServer(app);
 
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = [
+  "https://lively-votes-gcdm2ih6c-maheshs-projects-0091caae.vercel.app/",
+];
 
 export const io = new Server(httpServer, {
   cors: {

@@ -29,7 +29,7 @@ app.use(
 );
 
 // Explicit preflight for everything (Socket.IO polling loves this)
-app.options("*", cors());
+// app.options("*", cors());
 
 export const io = new Server(httpServer, {
   cors: {

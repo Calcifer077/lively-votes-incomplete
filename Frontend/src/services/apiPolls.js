@@ -47,7 +47,7 @@ export const createPoll = async function (data) {
   return null;
 };
 
-export const caseVote = async function (data) {
+export const castVote = async function (data) {
   const { pollId, optionId } = data;
 
   const res = await AxiosInstance({
@@ -60,7 +60,7 @@ export const caseVote = async function (data) {
   });
 
   if (res.data.status === "success") {
-    return res;
+    return res.data.data.dataToReturn;
   }
 
   return null;

@@ -14,7 +14,22 @@ const httpServer = createServer(app);
 
 const allowedOrigins = [
   "https://lively-votes-gcdm2ih6c-maheshs-projects-0091caae.vercel.app",
+  "https://lively-votes.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
 ];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
+
+// Explicit preflight for everything (Socket.IO polling loves this)
+app.options("*", cors());
 
 export const io = new Server(httpServer, {
   cors: {
@@ -40,15 +55,6 @@ const port = 3000;
 //   windowMs: 15 * 60 * 1000, // 15 minutes
 //   limit: 2,
 // });
-
-app.use(
-  cors({
-    origin: allowedOrigins,
-    methods: ["GET", "POST", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  }),
-);
 
 app.use(express.json());
 app.use(cookieParser());

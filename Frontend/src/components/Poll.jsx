@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+// import { useQueryClient } from "@tanstack/react-query";
 
 import { css } from "@emotion/css";
 
@@ -6,15 +6,14 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import DoneIcon from "@mui/icons-material/Done";
 
-import { useCasteVote } from "../features/polls/useCasteVote";
+import { useCastVote } from "../features/polls/useCastVote";
 import { useWhichOptionVoted } from "../features/polls/useWhichOptionVoted";
 import { useCountVotesForPoll } from "../features/polls/useCountVotesForPoll";
 import { CircularProgress } from "@mui/material";
 
 function Poll({ question, options, byMe, pollId }) {
-  const queryClient = useQueryClient();
+  const { castVote } = useCastVote();
 
-  const { casteVote } = useCasteVote();
   const { optionId, isLoadingOptionId } = useWhichOptionVoted(pollId);
 
   const { optionsWithVoteCount, isLoadingOptionsWithVoteCount } =
@@ -32,11 +31,11 @@ function Poll({ question, options, byMe, pollId }) {
     : options.map(() => 0);
 
   async function handleClick(optionId) {
-    await casteVote({ pollId, optionId });
+    await castVote({ pollId, optionId });
 
     // will refetch data and rerender the component
-    queryClient.invalidateQueries({ queryKey: ["whichOptionVoted", pollId] });
-    queryClient.invalidateQueries({ queryKey: ["countVotesForPoll", pollId] });
+    // queryClient.invalidateQueries({ queryKey: ["whichOptionVoted", pollId] });
+    // queryClient.invalidateQueries({ queryKey: ["countVotesForPoll", pollId] });
   }
 
   return (

@@ -93,6 +93,42 @@ export const getAllPolls = catchAsync(async function (req, res, next) {
   });
 });
 
+// Helper function for pagination function
+// Returns all the polls that the user has participated in, only their ids
+const pollsUserHaveParticipatedIn = async function (userId) {
+  const res = await db
+    .select({ id: VoteTable.poll_id })
+    .from(VoteTable)
+    .where(eq(VoteTable.user_id, userId));
+
+  return res;
+};
+
+/**
+ * This function will return polls with pagination.
+ * Will accept page number and return the polls for that page.
+ * What it returns
+ * data:[
+ *  {
+ *    id: Id of poll,
+ *    question: question of poll,
+ *    user_id: Id of the user who created this poll,
+ *    user: [
+ *      id: Id of user,
+ *      email: Email of user
+ *    ],
+ *    // Array of options belonging to this poll
+ *    options: [
+ *      {
+ *         id: Id of option
+ *         text: Text of option
+ *         poll_id: Id of poll which this option belong to.
+ *      }
+ *    ]
+ *   }
+ * ]
+ */
+
 export const getPollsWithPagination = catchAsync(
   async function (req, res, next) {
     // The user is authenticated
@@ -132,6 +168,8 @@ export const getPollsWithPagination = catchAsync(
       .where(notInArray(PollTable.id, pollsUserVotedIn));
 
     // get those polls in which user have not voted in / participated in
+    // limit -> tells how many result will come
+    // offset -> from where (kind of like index) it will start
     const polls = await db
       .select({
         id: PollTable.id,
@@ -196,16 +234,25 @@ export const getPollsWithPagination = catchAsync(
   },
 );
 
-const pollsUserHaveParticipatedIn = async function (userId) {
-  const res = await db
-    .select({ id: VoteTable.poll_id })
-    .from(VoteTable)
-    .where(eq(VoteTable.user_id, userId));
+/**
+ * Create a new poll
+ * User should be authenticated for this to work
+ * Needs questions and options from req.body
+ * What it returns
+ * data : {
+ *  id: id from poll table (pollId)
+ *  question: question from poll table
+ *  user_id: user_id from poll table
+ *  Aray of options created for this poll
+ *  options:
+ *    [
+ *      id: id of option
+ *      text: text of option
+ *      poll_id: poll_id of option to which it belongs
+ *    ]
+ *  }
+ */
 
-  return res;
-};
-
-// Creats a new poll, user should be authenticated for this to work
 export const createPoll = catchAsync(async function (req, res, next) {
   // 1. Get data from req.body
   // What we need, question, userid, options (will be a array)
@@ -268,13 +315,11 @@ export const createPoll = catchAsync(async function (req, res, next) {
 
   res.status(201).json({
     status: "success",
-    data: {
-      dataToReturn,
-    },
+    data: dataToReturn,
   });
 });
 
-// A error handling function
+// A error handling, helper function used to create a vote in database
 async function createVote(vote) {
   try {
     const [voteThatWasCreated] = await db
@@ -293,6 +338,19 @@ async function createVote(vote) {
 }
 
 // creates new vote in the database, user should be authenticated for this.
+
+/**
+ * Creates a new vote in the database
+ * User should be authenticated for this
+ * Updates in case vote is already present
+ * what it returns:
+ * {
+ *  id: id from vote table
+ *  user_id: user_id of user who voted
+ *  poll_id: poll_id of poll to which this vote belongs
+ *  option_id: option_id of the option on which vote was casted
+ * }
+ */
 export const castVote = catchAsync(async function (req, res, next) {
   // 1. Get data from req body
   // what we need, userId, pollId, optionId
@@ -356,11 +414,9 @@ export const castVote = catchAsync(async function (req, res, next) {
     // this event will be emitted when a vote has already been casted and user changed his vote.
     io.emit("votes:caste", pollId);
 
-    return res.status(201).json({
+    return res.status(200).json({
       status: "success",
-      data: {
-        dataToReturn,
-      },
+      data: dataToReturn,
     });
   }
 
@@ -380,15 +436,14 @@ export const castVote = catchAsync(async function (req, res, next) {
 
   res.status(201).json({
     status: "success",
-    data: {
-      dataToReturn,
-    },
+    data: dataToReturn,
   });
 });
 
 /**
  * Count votes for a poll using its pollId
  * What it needs -> parameters from req.params (pollId)
+ * User needs to be authenticated for this
  * What it returns -> dataToReturn
  * dataToReturn : {
  *  pollId: id from poll table (pollId) from above step
@@ -456,6 +511,18 @@ export const castVote = catchAsync(async function (req, res, next) {
 export const countVotes = catchAsync(async function (req, res, next) {
   const { pollId } = req.params;
 
+  // This user is authenticated
+  const userId = req.user.id;
+
+  const [userFromDatabase] = await db
+    .select()
+    .from(UsersTable)
+    .where(eq(UsersTable.id, userId));
+
+  if (!userFromDatabase) {
+    return next(new AppError("No User found with this ID", 401));
+  }
+
   // 1. Join OptionTable with VoteTable and count occurrences in one go
   const results = await db
     .select({
@@ -480,17 +547,27 @@ export const countVotes = catchAsync(async function (req, res, next) {
       return next(new AppError("No poll found with this ID", 404));
   }
 
+  const dataToReturn = {
+    pollId,
+    options: results,
+  };
+
   res.status(200).json({
     status: "success",
-    data: {
-      pollId,
-      options: results,
-    },
+    data: dataToReturn,
   });
 });
 
-// returns the option which is voted by the current user for a particular poll.
-// user is required to be authenticated for this to work.
+/**
+ * Returns the options which is voted by the current user for a particular poll
+ * User is required to be authenticated for this to work.
+ * It needs pollId from params.
+ * what it returns:
+ * {
+ *  optionId: which option is voted by this user.
+ * }
+ * If there is not vote by this user it will return 0.
+ */
 export const whichOptionVoted = catchAsync(async function (req, res, next) {
   const { pollId } = req.params;
 
@@ -521,8 +598,6 @@ export const whichOptionVoted = catchAsync(async function (req, res, next) {
       .where(
         and(eq(VoteTable.user_id, userId), eq(VoteTable.option_id, el.id)),
       );
-
-    // console.log(voteFromDatabase);
 
     if (voteFromDatabase) {
       return res.status(200).json({

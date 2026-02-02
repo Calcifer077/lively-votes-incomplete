@@ -6,7 +6,11 @@ export const getAllPolls = async function () {
     method: "get",
   });
 
-  return res.data;
+  if (res.data.status === "success") {
+    return res.data;
+  }
+
+  return null;
 };
 
 export const getPollsWithPagination = async function ({ pageParam = 1 }) {
@@ -41,7 +45,7 @@ export const createPoll = async function (data) {
   });
 
   if (res.data.status === "success") {
-    return res;
+    return res.data;
   }
 
   return null;
@@ -60,7 +64,7 @@ export const castVote = async function (data) {
   });
 
   if (res.data.status === "success") {
-    return res.data.data.dataToReturn;
+    return res.data;
   }
 
   return null;
@@ -90,7 +94,8 @@ export const countVotesForPoll = async function (pollId) {
   });
 
   if (res.data.status === "success") {
-    return res.data.data.options; // returns array of { optionId, voteCount }
+    return res.data.data.options;
+    // returns array of { optionId, voteCount }
   }
 
   return [];

@@ -12,11 +12,11 @@ export const loginUser = async function (data) {
   if (res.data.status === "success") {
     const newUser = {
       id: res.data.data.user.id,
-      jwt: res.data.token,
+      jwt: res.data.accessToken,
       email: res.data.data.user.email,
     };
 
-    localStorage.setItem("jwt", res.data.token);
+    localStorage.setItem("jwt", newUser.jwt);
 
     return newUser;
   }
@@ -40,11 +40,11 @@ export const signupUser = async function (data) {
   if (res.data.status === "success") {
     const newUser = {
       id: res.data.data.user.id,
-      jwt: res.data.token,
+      jwt: res.data.accessToken,
       email: res.data.data.user.email,
     };
 
-    localStorage.setItem("jwt", res.data.token);
+    localStorage.setItem("jwt", newUser.jwt);
 
     return newUser;
   }

@@ -1,7 +1,17 @@
 import axios from "axios";
 
+let BASEURL = "";
+
+if (import.meta.env.DEV) {
+  BASEURL = import.meta.env.VITE_URL_WHEN_DEV;
+} else {
+  BASEURL = import.meta.env.VITE_URL_WHEN_PROD;
+}
+
+console.log(BASEURL);
+
 const AxiosInstance = axios.create({
-  baseURL: "https://lively-votes.onrender.com/api/v1",
+  baseURL: BASEURL + "/api/v1",
   withCredentials: true,
 });
 

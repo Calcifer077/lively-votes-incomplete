@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { whichOptionVoted } from "../../services/apiPolls";
+import { useAxiosPrivate } from "../axios/useAxiosPrivate";
 
 // returns the option id on which the user have voted for the given pollId
 // only works if the user is logged in
 // if the user is not logged in, returns 0
 export const useWhichOptionVoted = function (pollId) {
+  const axiosInstance = useAxiosPrivate();
+
   const {
     data: optionId,
     isLoading,
@@ -12,7 +15,7 @@ export const useWhichOptionVoted = function (pollId) {
     error,
   } = useQuery({
     queryKey: ["whichOptionVoted", pollId],
-    queryFn: () => whichOptionVoted(pollId),
+    queryFn: () => whichOptionVoted(axiosInstance, pollId),
   });
 
   if (isLoading) {

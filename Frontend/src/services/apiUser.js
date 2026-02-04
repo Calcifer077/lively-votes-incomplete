@@ -1,7 +1,7 @@
-import { AxiosInstance } from "./apiConfig";
+// import { AxiosInstance } from "./apiConfig";
 
-export const getProfileData = async function () {
-  const res = await AxiosInstance({
+export const getProfileData = async function (axiosInstance) {
+  const res = await axiosInstance({
     url: `/users/getUserData`,
     method: "get",
   });
@@ -12,8 +12,8 @@ export const getProfileData = async function () {
   return [];
 };
 
-export const getPollsUserHaveVotedIn = async function () {
-  const res = await AxiosInstance({
+export const getPollsUserHaveVotedIn = async function (axiosInstance) {
+  const res = await axiosInstance({
     url: "/users/getPollsUserHaveVotedIn",
     method: "get",
   });

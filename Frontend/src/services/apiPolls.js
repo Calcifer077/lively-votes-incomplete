@@ -13,8 +13,11 @@ export const getAllPolls = async function () {
   return null;
 };
 
-export const getPollsWithPagination = async function ({ pageParam = 1 }) {
-  const res = await AxiosInstance({
+export const getPollsWithPagination = async function ({
+  axiosInstance,
+  pageParam = 1,
+}) {
+  const res = await axiosInstance({
     url: `/polls/getPollsWithPagination/${pageParam}`,
     method: "get",
   });
@@ -26,7 +29,7 @@ export const getPollsWithPagination = async function ({ pageParam = 1 }) {
   return null;
 };
 
-export const createPoll = async function (data) {
+export const createPoll = async function (axiosInstance, data) {
   const { question, options } = data;
 
   const optionsToSend = [];
@@ -35,7 +38,7 @@ export const createPoll = async function (data) {
     optionsToSend.push({ text: option });
   });
 
-  const res = await AxiosInstance({
+  const res = await axiosInstance({
     url: "/polls",
     method: "post",
     data: {
@@ -51,10 +54,8 @@ export const createPoll = async function (data) {
   return null;
 };
 
-export const castVote = async function (data) {
-  const { pollId, optionId } = data;
-
-  const res = await AxiosInstance({
+export const castVote = async function ({ axiosInstance, pollId, optionId }) {
+  const res = await axiosInstance({
     url: "/polls/castVote",
     method: "post",
     data: {
@@ -70,12 +71,12 @@ export const castVote = async function (data) {
   return null;
 };
 
-export const whichOptionVoted = async function (pollId) {
+export const whichOptionVoted = async function (axiosInstance, pollId) {
   const jwt = localStorage.getItem("jwt");
 
   if (!jwt) return 0;
 
-  const res = await AxiosInstance({
+  const res = await axiosInstance({
     url: `/polls/whichOptionVoted/${pollId}`,
     method: "get",
   });
@@ -87,8 +88,8 @@ export const whichOptionVoted = async function (pollId) {
   return 0;
 };
 
-export const countVotesForPoll = async function (pollId) {
-  const res = await AxiosInstance({
+export const countVotesForPoll = async function (axiosInstance, pollId) {
+  const res = await axiosInstance({
     url: `/polls/countVotes/${pollId}`,
     method: "get",
   });

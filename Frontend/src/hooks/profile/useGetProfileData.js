@@ -1,7 +1,9 @@
 import { getProfileData } from "../../services/apiUser";
 import { useQuery } from "@tanstack/react-query";
+import { useAxiosPrivate } from "../axios/useAxiosPrivate";
 
 export function useGetProfileData() {
+  const axiosInstance = useAxiosPrivate();
   const {
     data: profileData,
     isLoading,
@@ -9,7 +11,7 @@ export function useGetProfileData() {
     error,
   } = useQuery({
     queryKey: ["getProfileData"],
-    queryFn: () => getProfileData(),
+    queryFn: () => getProfileData(axiosInstance),
   });
 
   const { data } = profileData || {}; // Destructure data from profileData

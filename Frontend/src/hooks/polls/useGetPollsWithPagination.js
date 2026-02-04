@@ -1,7 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getPollsWithPagination } from "../../services/apiPolls";
+import { useAxiosPrivate } from "../axios/useAxiosPrivate";
 
 export function useGetPollsWithPagination() {
+  const axiosInstance = useAxiosPrivate();
+
   const {
     data,
     error,
@@ -12,8 +15,9 @@ export function useGetPollsWithPagination() {
     status,
   } = useInfiniteQuery({
     queryKey: ["polls"],
-    queryFn: getPollsWithPagination,
-    getNextPageParam: (lastPage) => {
+    queryFn: ({ pageParam = 1 }) =>
+      getPollsWithPagination({ axiosInstance, pageParam }),
+    getNextPageParam: (axiosInstance, lastPage) => {
       let currPage = lastPage.page;
       let totalPages = lastPage.totalPages;
 

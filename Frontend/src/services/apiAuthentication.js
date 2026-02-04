@@ -16,7 +16,7 @@ export const loginUser = async function (data) {
       email: res.data.data.user.email,
     };
 
-    localStorage.setItem("jwt", newUser.jwt);
+    // localStorage.setItem("jwt", newUser.jwt);
 
     return newUser;
   }

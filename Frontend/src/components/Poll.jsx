@@ -5,13 +5,16 @@ import { css } from "@emotion/css";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import DoneIcon from "@mui/icons-material/Done";
+import { CircularProgress } from "@mui/material";
 
 import { useCastVote } from "../hooks/polls/useCastVote";
 import { useWhichOptionVoted } from "../hooks/polls/useWhichOptionVoted";
 import { useCountVotesForPoll } from "../hooks/polls/useCountVotesForPoll";
-import { CircularProgress } from "@mui/material";
+import { useAxiosPrivate } from "../hooks/axios/useAxiosPrivate";
 
 function Poll({ question, options, byMe, pollId }) {
+  const axiosInstance = useAxiosPrivate();
+
   const { castVote } = useCastVote();
 
   const { optionId, isLoadingOptionId } = useWhichOptionVoted(pollId);
@@ -31,7 +34,8 @@ function Poll({ question, options, byMe, pollId }) {
     : options.map(() => 0);
 
   async function handleClick(optionId) {
-    await castVote({ pollId, optionId });
+    // tanstack query only accepts one argument and than passes it to corresponding api function.
+    await castVote({ axiosInstance, pollId, optionId });
 
     // will refetch data and rerender the component
     // queryClient.invalidateQueries({ queryKey: ["whichOptionVoted", pollId] });
